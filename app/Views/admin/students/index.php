@@ -35,19 +35,21 @@
               <td><?= esc($st['full_name']) ?></td>
               <td><span class="badge text-bg-secondary"><?= esc($st['username']) ?></span></td>
               <td><?= esc($st['entry_year']) ?></td>
-              <td>
+              <td class="d-flex gap-2">
                 <a class="btn btn-sm btn-primary"
                    href="<?= site_url('admin/students/edit/'.$st['student_id']) ?>">
                   <i class="bi bi-pencil-square me-1"></i>Edit
                 </a>
-                <form class="d-inline" method="post"
-                      action="<?= site_url('admin/students/delete/'.$st['student_id']) ?>"
-                      onsubmit="return confirm('Hapus student ini?')">
-                  <?= csrf_field() ?>
-                  <button class="btn btn-sm btn-outline-danger">
-                    <i class="bi bi-trash3 me-1"></i>Delete
-                  </button>
-                </form>
+
+                <button type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+                  data-action="<?= site_url('admin/students/delete/'.$st['student_id']) ?>"
+                  data-name="<?= esc($st['full_name']) ?>"
+                  data-meta-label="NIM"
+                  data-meta="<?= esc($st['student_id']) ?>">
+                  <i class="bi bi-trash3 me-1"></i>Delete
+                </button>
               </td>
             </tr>
           <?php endforeach; ?>

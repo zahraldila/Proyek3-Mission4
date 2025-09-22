@@ -61,9 +61,7 @@
     .sidebar.collapsed{ width:80px; padding:18px 8px; }
     .sidebar.collapsed .brand,
     .sidebar.collapsed .nav-label,
-    .sidebar.collapsed .user-name{
-      display:none !important;
-    }
+    .sidebar.collapsed .user-name{ display:none !important; }
     .sidebar.collapsed .nav-link{ justify-content:center; padding:10px; }
     .sidebar.collapsed .nav-link span{ display:none; }
     .sidebar.collapsed .nav-link.active::before{ left:-4px; }
@@ -103,10 +101,8 @@
     .chip{ display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .6rem; border-radius:999px; font-size:12px; font-weight:600; }
     .chip-ok{ background:var(--accent-soft); color:#166534; }
 
-    /* Hide toggle on mobile (pakai off-canvas tombol list) */
-    @media (max-width: 992px){
-      .desktop-toggle{ display:none; }
-    }
+    /* Hide toggle on mobile */
+    @media (max-width: 992px){ .desktop-toggle{ display:none; } }
   </style>
 </head>
 <body>
@@ -114,16 +110,12 @@
 
   <!-- ===== SIDEBAR ===== -->
   <aside class="sidebar" id="sidebar">
-
-    <!-- bar atas (mobile close & desktop collapse) -->
     <div class="d-flex align-items-center justify-content-between mb-2">
       <div class="brand">Akademik</div>
       <div class="d-flex align-items-center gap-1">
-        <!-- desktop collapse toggle -->
         <button class="btn btn-sm desktop-toggle" id="collapseToggle" title="Collapse sidebar">
           <i class="bi bi-chevron-double-left"></i>
         </button>
-        <!-- mobile close -->
         <button class="btn btn-sm d-lg-none" onclick="document.getElementById('sidebar').classList.remove('show')">
           <i class="bi bi-x-lg"></i>
         </button>
@@ -133,8 +125,9 @@
     <?php
       $role = session('role');
       $uri  = service('uri');
-      $seg1 = $uri->getSegment(2) ?? '';
-      $isActive = function (string $expect) use ($seg1) { return $seg1 === $expect ? 'active' : ''; };
+      $seg1 = $uri->getTotalSegments() >= 1 ? $uri->getSegment(1) : '';
+      $seg2 = $uri->getTotalSegments() >= 2 ? $uri->getSegment(2) : '';
+      $isActive = function (string $expect) use ($seg2) { return $seg2 === $expect ? 'active' : ''; };
     ?>
 
     <nav class="nav-aside">
@@ -191,7 +184,6 @@
 
   <!-- ===== CONTENT ===== -->
   <main class="content">
-    <!-- topbar mobile -->
     <div class="topbar position-fixed top-0 start-0 end-0 d-lg-none">
       <div class="container-fluid d-flex align-items-center gap-2 py-2">
         <button class="btn" onclick="document.getElementById('sidebar').classList.add('show')">
@@ -215,11 +207,9 @@
     const sidebar = document.getElementById('sidebar');
     const appShell = document.querySelector('.app-shell');
     const btn = document.getElementById('collapseToggle');
-
     if(!btn) return;
     btn.addEventListener('click', () => {
       sidebar.classList.toggle('collapsed');
-      // optional: kecilkan grid col saat collapse
       if (sidebar.classList.contains('collapsed')) {
         appShell.style.gridTemplateColumns = '80px 1fr';
         btn.innerHTML = '<i class="bi bi-chevron-double-right"></i>';
@@ -232,5 +222,52 @@
     });
   })();
 </script>
+
+<!-- Modal konfirmasi delete/unenroll -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Konfirmasi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Kamu akan menghapus/unenroll:</p>
+        <div class="p-2 border rounded bg-light">
+          <strong id="delName">—</strong><br>
+          <span class="text-muted small"><span id="delMetaLabel">SKS</span>: <span id="delMeta">—</span></span>
+        </div>
+        <div class="mt-2 text-danger small">Tindakan ini tidak bisa dibatalkan.</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <form id="deleteForm" method="post" action="#">
+          <?= csrf_field() ?>
+          <button class="btn btn-danger">Ya, lanjut</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const modalEl = document.getElementById('confirmDeleteModal');
+  const form    = document.getElementById('deleteForm');
+  const nameEl  = document.getElementById('delName');
+  const metaEl  = document.getElementById('delMeta');
+  const metaLbl = document.getElementById('delMetaLabel');
+
+  modalEl.addEventListener('show.bs.modal', (e) => {
+    const btn = e.relatedTarget; if (!btn) return;
+    form.action         = btn.getAttribute('data-action') || '#';
+    nameEl.textContent  = btn.getAttribute('data-name') || '-';
+    // generik: pakai data-meta + data-meta-label; fallback ke data-sks agar kompatibel
+    metaEl.textContent  = btn.getAttribute('data-meta') || btn.getAttribute('data-sks') || '-';
+    metaLbl.textContent = btn.getAttribute('data-meta-label') || (btn.hasAttribute('data-sks') ? 'SKS' : 'Info');
+  });
+});
+</script>
+
 </body>
 </html>

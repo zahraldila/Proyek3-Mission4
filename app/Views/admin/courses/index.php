@@ -33,19 +33,21 @@
               <td><?= esc($c['course_id']) ?></td>
               <td class="fw-semibold"><?= esc($c['course_name']) ?></td>
               <td><span class="badge text-bg-secondary"><?= esc($c['credits']) ?> SKS</span></td>
-              <td>
+              <td class="d-flex gap-2">
                 <a class="btn btn-sm btn-primary"
                    href="<?= site_url('admin/courses/edit/'.$c['course_id']) ?>">
                   <i class="bi bi-pencil-square me-1"></i>Edit
                 </a>
-                <form class="d-inline" method="post"
-                      action="<?= site_url('admin/courses/delete/'.$c['course_id']) ?>"
-                      onsubmit="return confirm('Hapus course ini?')">
-                  <?= csrf_field() ?>
-                  <button class="btn btn-sm btn-outline-danger">
-                    <i class="bi bi-trash3 me-1"></i>Delete
-                  </button>
-                </form>
+
+                <button type="button"
+                  class="btn btn-outline-danger btn-sm"
+                  data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+                  data-action="<?= site_url('admin/courses/delete/'.$c['course_id']) ?>"
+                  data-name="<?= esc($c['course_name']) ?>"
+                  data-meta-label="SKS"
+                  data-meta="<?= esc($c['credits']) ?>">
+                  <i class="bi bi-trash"></i> Delete
+                </button>
               </td>
             </tr>
           <?php endforeach; ?>
